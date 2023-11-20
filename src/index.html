@@ -7,13 +7,31 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="icon" href="/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="/styles.css">
-    <title>Document</title>
+    <title>CRUD Operations / Json-server</title>
 </head>
 <body>
-    <h1>
-        Hello World
-    </h1>
-    <img src="/assets/images/cat.jpeg" alt="" width="300">
+    <section>
+        <div class="js-movie-container"></div>
+    </section>
+
+    <div class="js-form-global-container">
+        <form class="js-form-container form-container">
+            <h2>Add new movie</h2>
+            <input type="text" name="nickname" placeholder="Enter your nickname">
+            <br>
+            <br>
+            <input type="text" name="movie title" placeholder="Movie to be discussed" >
+            <br>
+            <br>
+            <textarea name="review" rows="4" cols="50" placeholder="Enter your thoughts"></textarea>
+            <br>
+            <br>
+            <input type="text" name="movie score" placeholder="Evaluation (1-10)">
+            <br>
+            <br>
+            <button class="submit-button">Submit</button>
+        </form>
+    </div>
 
 
     <script src="/scripts.js"></script>
