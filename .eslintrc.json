@@ -30,6 +30,9 @@
         "no-trailing-spaces": "off",
         "spaced-comment": "off",
         "no-param-reassign": "off",
-        "padded-blocks":"off"
+        "padded-blocks": "off",
+        "arrow-body-style": "off",
+        "no-use-before-define": "off",
+        "max-len": "off"
     }
 }
