@@ -2,6 +2,7 @@ import axios, { all } from 'axios'; // library, HTTP requests execution
 
 const formContainer = document.querySelector<HTMLDivElement>('.js-movie-container');
 const blockImage = document.querySelector('.js-block-image');
+let currentImageUrl = '';
 const defaultImgPath = './assets/images/default-image-icon.jpg';
 
 type Movie = {
@@ -12,7 +13,7 @@ type Movie = {
     review: string;
     evaluation: number;
 }
-
+0
 const allMovies = () => {
     const result = axios.get<Movie[]>('http://localhost:3004/movies');
 
@@ -24,7 +25,7 @@ const allMovies = () => {
 
             formContainer.innerHTML += `
             <div>
-                <img src="${movie.image}" alt="Movie Image" style="width: 200px; height: auto;">
+                <img src="${movie.image}" alt="Movie Image" class="movie-image" style="width: 200px; height: auto;">
                 <p>${movie.nickname}</p>
                 <p>${movie.movie}</p>
                 <p>${movie.review}</p>
@@ -73,13 +74,15 @@ movieForm.addEventListener('submit', (event) => {
         movie: formValues[1],
         review: formValues[2],
         evaluation: formValues[3],
-        image: 'https://t4.ftcdn.net/jpg/00/97/58/97/360_F_97589769_t45CqXyzjz0KXwoBZT9PRaWGHRk5hQqQ.jpg',
+        image: currentImageUrl,
     }).then(() => {
         allMovies();
         //clear value of (input, textarea)
         formElements.forEach((element) => {
             element.value = '';
         });
+
+        currentImageUrl = defaultImgPath;
     })
     .catch((error) => {
         console.error('Error posting data:', error);
@@ -88,20 +91,65 @@ movieForm.addEventListener('submit', (event) => {
 
 const imageButton = document.querySelector<HTMLButtonElement>('.image-button');
 // event for image
-imageButton.addEventListener('click', () => {
+imageButton.addEventListener('click', async () => {
     try {
-        const imageUrl = 'https://t4.ftcdn.net/jpg/00/97/58/97/360_F_97589769_t45CqXyzjz0KXwoBZT9PRaWGHRk5hQqQ.jpg';
+        // URL request
+        // eslint-disable-next-line no-alert
+        const imageUrl = prompt('Enter the URL of the image:');
 
-        const imageElement = document.createElement('img');
-        imageElement.style.width = '200px';
-        imageElement.style.height = 'auto';
-        imageElement.src = imageUrl;
+        if (imageUrl) {
+            currentImageUrl = imageUrl;
 
-        // add image to container
-        formContainer.appendChild(imageElement);
+            // GOOGLE HERE
+            const formData = new FormData();
+            formData.append('image', imageUrl);
+
+            try {
+                const response = await axios.post('http://localhost:3004/images', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                // Get the URL of the image from the server response
+                const createdImageUrl = response.data.url;
+
+                const imageElement = document.createElement('img');
+                imageElement.style.width = '200px';
+                imageElement.style.height = 'auto';
+                imageElement.src = createdImageUrl;
+
+                formContainer.appendChild(imageElement);
+            } catch (error) {
+                console.error('Error creating image:', error);
+            }
+        } else {
+            currentImageUrl = defaultImgPath;
+        }
     } catch (error) {
         console.error('Error adding image:', error);
     }
 });
 
+// const clearImagesButton = document.querySelectorAll<HTMLButtonElement>('.clear-images-button');
 
+// clearImagesButton.forEach((srcDeleteButton) => {
+//     srcDeleteButton.addEventListener('click', () => {
+//         console.log('Button clicked!');
+//         const id = srcDeleteButton.dataset.imageId;
+//         console.log('Trying to delete image with id:', id);
+
+//         if (id) {
+//             axios.delete(`http://localhost:3004/images/${id}`)
+//                 .then(() => {
+//                     console.log('Image deleted successfully.');
+//                     allMovies();
+//                 })
+//                 .catch((error) => {
+//                     console.error('Error deleting image:', error);
+//                 });
+//         } else {
+//             console.warn('No image id found in dataset.');
+//         }
+//     });
+// });
