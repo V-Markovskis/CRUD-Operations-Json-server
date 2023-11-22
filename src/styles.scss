@@ -1,8 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Heebo&family=Inter:wght@400;500&family=Poppins:wght@800&family=Roboto+Condensed&family=Roboto:ital,wght@1,300;1,400&display=swap');
+
 body {
   background-color: antiquewhite;
+  font-family: 'Roboto', sans-serif;
 }
 
-// .js-movie-container {
-//   width: 200px;
-//   height: auto;
-// }
+html {
+  box-sizing: border-box;
+}
+
+.movie-container {
+  display: flex;
+  gap: 50px;
+  margin-bottom: 50px;
+}
+
+.movie-container div {
+  border: 1px solid black;
+  padding: 50px;
+  border-radius: 10px;
+}
+
+.movie-container button {
+  padding: 10px 20px;
+  background-color: green;
+}
+
+/* Add new movie form */
+.form-global-container {
+  max-width: 400px;
+}
+
+.form-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 300px));
+  gap: 10px;
+}

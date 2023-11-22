@@ -44,10 +44,10 @@ const allMovies = () => {
             formContainer.innerHTML += `
             <div>
                 <img src=${movie.image} alt="Image here" width=200;/>
-                <p>${movie.nickname}</p>
-                <p>${movie.movie}</p>
+                <p>User: ${movie.nickname}</p>
+                <p>Movie name: ${movie.movie}</p>
                 <p>${movie.review}</p>
-                <p>${movie.evaluation}</p>
+                <p>${movie.evaluation} out of 10</p>
                 <p>Created at: ${createdAt}</p>
                 <button class="delete-button-js" data-movie-id=${movie.id}>Delete</button>
             </div>
@@ -85,6 +85,7 @@ movieForm.addEventListener('submit', (event) => {
 
     const formElements = movieForm.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.review-main-details');
     const createdAt = new Date();
+    //element.value is used to retrieve the value of each form element (input field or text field)
     const formValues = Array.from(formElements).map((element) => element.value);
     
     console.log('Form values: ', formValues);

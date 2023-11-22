@@ -13,32 +13,22 @@
     <section>
             <div class="global-test"></div>
             <div class="js-image-container"></div>
-            <div class="js-movie-container"></div>
+            <div class="js-movie-container movie-container"></div>
     </section>
 
-    <div class="js-form-global-container">
+    <div class="js-form-global-container form-global-container">
         <form class="js-form-container form-container">
             <h2>Add new movie</h2>
             <label for="nickname">Your Nickname:</label>
             <input type="text" name="nickname" placeholder="Enter your nickname" class="review-main-details" required>
-            <br>
-            <br>
             <label for="movie title">Enter Movie:</label>
             <input type="text" name="movie title" placeholder="Movie to be discussed" class="review-main-details" required>
-            <br>
-            <br>
             <label for="review">Your review:</label>
-            <textarea name="review" rows="4" cols="50" placeholder="Enter your thoughts" class="review-main-details" required></textarea>
-            <br>
-            <br>
+            <textarea name="review" rows="4" cols="50" placeholder="Enter your thoughts" class="review-main-details" maxlength="200" required></textarea>
             <label for="movie score">Movie score:</label>
-            <input type="text" name="movie score" placeholder="Evaluation (1-10)" class="review-main-details" required>
-            <br>
-            <br>
+            <input type="number" name="movie score" placeholder="Evaluation (1-10)" min="1" max="10" class="review-main-details" required>
             <label for="image">Image URL:</label>
-            <input type="text" id="image" name="image" class="review-main-details" required>
-            <br>
-            <br>
+            <input type="text" id="image" name="image" class="review-main-details" placeholder="Post image URL"required>
             <button class="submit-button">Submit</button>
         </form>
     </div>
