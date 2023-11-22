@@ -1,4 +1,5 @@
 import axios, { all } from 'axios'; // library, HTTP requests execution
+import { formatDistanceToNow } from 'date-fns';
 
 // const globalContainer = document.querySelector<HTMLDivElement>('.js-global-container');
 const formContainer = document.querySelector<HTMLDivElement>('.js-movie-container');
@@ -14,6 +15,7 @@ type Movie = {
     movie: string;
     review: string;
     evaluation: number;
+    creationTime: Date;
 }
 
 // type Image = {
@@ -26,14 +28,18 @@ const allMovies = () => {
 
     formContainer.innerHTML = '';
     
-    
     result.then(({ data }) => {
         data.forEach((movie) => {
-
+            
             const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
             if (!urlRegex.test(movie.image)) {
                 movie.image = defaultImgPath;
             }
+            
+            //https://date-fns.org/v2.16.1/docs/formatDistanceToNow
+            const createdAt = formatDistanceToNow(new Date(movie.creationTime), { addSuffix: true });
+            console.log(createdAt);
+
 
             formContainer.innerHTML += `
             <div>
@@ -42,6 +48,7 @@ const allMovies = () => {
                 <p>${movie.movie}</p>
                 <p>${movie.review}</p>
                 <p>${movie.evaluation}</p>
+                <p>Created at: ${createdAt}</p>
                 <button class="delete-button-js" data-movie-id=${movie.id}>Delete</button>
             </div>
         `; 
@@ -68,6 +75,40 @@ const allMovies = () => {
         });
     });
 };
+
+allMovies();
+
+const movieForm = document.querySelector('.js-form-container');
+
+movieForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const formElements = movieForm.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.review-main-details');
+    const createdAt = new Date();
+    const formValues = Array.from(formElements).map((element) => element.value);
+    
+    console.log('Form values: ', formValues);
+
+    axios.post<Movie>('http://localhost:3004/movies', {
+        nickname: formValues[0],
+        movie: formValues[1],
+        review: formValues[2],
+        evaluation: formValues[3],
+        image: formValues[4],
+        creationTime: createdAt,
+    }).then(() => {
+        allMovies();
+        //clear value of (input, textarea)
+        formElements.forEach((element) => {
+            element.value = '';
+        });
+    })
+    .catch((error) => {
+        console.error('Error posting data:', error);
+    });
+});
+
+
 
 // const allImages = () => {
 //     const result = axios.get<Image[]>('http://localhost:3004/images');
@@ -111,38 +152,6 @@ const allMovies = () => {
 // appendToGlobalContainer();
 
 // allImages();
-allMovies();
-
-const movieForm = document.querySelector('.js-form-container');
-
-movieForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    const formElements = movieForm.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.review-main-details');
-    const formValues = Array.from(formElements).map((element) => element.value);
-    
-    console.log('Form values: ', formValues);
-
-    axios.post<Movie>('http://localhost:3004/movies', {
-        nickname: formValues[0],
-        movie: formValues[1],
-        review: formValues[2],
-        evaluation: formValues[3],
-        image: formValues[4],
-        // image: currentImageUrl,
-    }).then(() => {
-        allMovies();
-        //clear value of (input, textarea)
-        formElements.forEach((element) => {
-            element.value = '';
-        });
-
-        // currentImageUrl = defaultImgPath;
-    })
-    .catch((error) => {
-        console.error('Error posting data:', error);
-    });
-});
 
 
 // event for image
