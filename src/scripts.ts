@@ -1,23 +1,25 @@
 import axios, { all } from 'axios'; // library, HTTP requests execution
 
+// const globalContainer = document.querySelector<HTMLDivElement>('.js-global-container');
 const formContainer = document.querySelector<HTMLDivElement>('.js-movie-container');
-const imageContainer = document.querySelector<HTMLDivElement>('.js-image-container');
-const imageButton = document.querySelector<HTMLButtonElement>('.image-button');
-let currentImageUrl = '';
+// const imageContainer = document.querySelector<HTMLDivElement>('.js-image-container');
+// const imageButton = document.querySelector<HTMLButtonElement>('.image-button');
+// let currentImageUrl = '';
 const defaultImgPath = './assets/images/default-image-icon.jpg';
 
 type Movie = {
     id: number;
+    image: string;
     nickname: string;
     movie: string;
     review: string;
     evaluation: number;
 }
 
-type Image = {
-    id: number;
-    image: string;
-}
+// type Image = {
+//     id: number;
+//     image: string;
+// }
 
 const allMovies = () => {
     const result = axios.get<Movie[]>('http://localhost:3004/movies');
@@ -28,8 +30,14 @@ const allMovies = () => {
     result.then(({ data }) => {
         data.forEach((movie) => {
 
+            const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+            if (!urlRegex.test(movie.image)) {
+                movie.image = defaultImgPath;
+            }
+
             formContainer.innerHTML += `
             <div>
+                <img src=${movie.image} alt="Image here" width=200;/>
                 <p>${movie.nickname}</p>
                 <p>${movie.movie}</p>
                 <p>${movie.review}</p>
@@ -61,36 +69,48 @@ const allMovies = () => {
     });
 };
 
-const allImages = () => {
-    const result = axios.get<Image[]>('http://localhost:3004/images');
+// const allImages = () => {
+//     const result = axios.get<Image[]>('http://localhost:3004/images');
 
-    imageContainer.innerHTML = '';
+//     imageContainer.innerHTML = '';
 
-    result.then(({ data }) => {
-        data.forEach((image) => {
-            imageContainer.innerHTML += `
-                <div>
-                    <img src="${image.image}" alt="Image" class="image" style="width: 200px; height: auto;">
-                    <br>
-                    <button class="delete-image-button" data-image-id=${image.id}>Delete</button>
-                </div>
-            `;
-        });
+//     result.then(({ data }) => {
+//         data.forEach((image) => {
+//             imageContainer.innerHTML += `
+//                 <div>
+//                     <img src="${image.image}" alt="Image" class="image" style="width: 200px; height: auto;">
+//                     <br>
+//                     <button class="delete-image-button" data-image-id=${image.id}>Delete</button>
+//                 </div>
+//             `;
+//         });
 
-        const imageDeleteButtons = document.querySelectorAll<HTMLButtonElement>('.delete-image-button');
+//         const imageDeleteButtons = document.querySelectorAll<HTMLButtonElement>('.delete-image-button');
 
-        imageDeleteButtons.forEach((deleteButton) => {
-            deleteButton.addEventListener('click', () => {
-                const { imageId } = deleteButton.dataset;
-                axios.delete(`http://localhost:3004/images/${imageId}`).then(() => {
-                    allImages();
-                });
-            });
-        });
-    });
-};
+//         imageDeleteButtons.forEach((deleteButton) => {
+//             deleteButton.addEventListener('click', () => {
+//                 const { imageId } = deleteButton.dataset;
+//                 axios.delete(`http://localhost:3004/images/${imageId}`).then(() => {
+//                     allImages();
+//                 });
+//             });
+//         });
+//     });
+// };
 
-allImages();
+// function appendToGlobalContainer() {
+//     const globalContainer = document.querySelector('.global-test');
+
+//     globalContainer.appendChild(imageContainer);
+//     globalContainer.appendChild(formContainer);
+
+//     allImages();
+//     allMovies();
+// }
+
+// appendToGlobalContainer();
+
+// allImages();
 allMovies();
 
 const movieForm = document.querySelector('.js-form-container');
@@ -108,6 +128,7 @@ movieForm.addEventListener('submit', (event) => {
         movie: formValues[1],
         review: formValues[2],
         evaluation: formValues[3],
+        image: formValues[4],
         // image: currentImageUrl,
     }).then(() => {
         allMovies();
@@ -125,40 +146,40 @@ movieForm.addEventListener('submit', (event) => {
 
 
 // event for image
-imageButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    try {
-        // URL request
-        // eslint-disable-next-line no-alert
-        const imageUrl = prompt('Enter the URL of the image:');
+// imageButton.addEventListener('click', (event) => {
+//     event.preventDefault();
+//     try {
+//         // URL request
+//         // eslint-disable-next-line no-alert
+//         const imageUrl = prompt('Enter the URL of the image:');
 
-        if (imageUrl) {
-            currentImageUrl = imageUrl;
-        } else {
-            // If no URL is provided, use the default image
-            currentImageUrl = defaultImgPath;
-        }
+//         if (imageUrl) {
+//             currentImageUrl = imageUrl;
+//         } else {
+//             // If no URL is provided, use the default image
+//             currentImageUrl = defaultImgPath;
+//         }
 
-        // Send a request to the server to add the image
-        axios.post<Image>('http://localhost:3004/images', {
-            image: currentImageUrl,
-        }).then(() => {
-            allImages();
+//         // Send a request to the server to add the image
+//         axios.post<Image>('http://localhost:3004/images', {
+//             image: currentImageUrl,
+//         }).then(() => {
+//             allImages();
 
-            currentImageUrl = defaultImgPath;
-        })
-        .catch((error) => {
-            console.error('Error posting data:', error);
-        });
+//             currentImageUrl = defaultImgPath;
+//         })
+//         .catch((error) => {
+//             console.error('Error posting data:', error);
+//         });
 
-        // Create an image element and append it to the container
-        const imageElement = document.createElement('img');
-        imageElement.style.width = '200px';
-        imageElement.style.height = 'auto';
-        imageElement.src = currentImageUrl;
+//         // Create an image element and append it to the container
+//         const imageElement = document.createElement('img');
+//         imageElement.style.width = '200px';
+//         imageElement.style.height = 'auto';
+//         imageElement.src = currentImageUrl;
 
-        imageContainer.appendChild(imageElement);
-    } catch (error) {
-        console.error('Error adding image:', error);
-    }
-});
+//         imageContainer.appendChild(imageElement);
+//     } catch (error) {
+//         console.error('Error adding image:', error);
+//     }
+// });
