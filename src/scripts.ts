@@ -1,19 +1,24 @@
 import axios, { all } from 'axios'; // library, HTTP requests execution
 
 const formContainer = document.querySelector<HTMLDivElement>('.js-movie-container');
-const blockImage = document.querySelector('.js-block-image');
+const imageContainer = document.querySelector<HTMLDivElement>('.js-image-container');
+const imageButton = document.querySelector<HTMLButtonElement>('.image-button');
 let currentImageUrl = '';
 const defaultImgPath = './assets/images/default-image-icon.jpg';
 
 type Movie = {
     id: number;
-    image: string;
     nickname: string;
     movie: string;
     review: string;
     evaluation: number;
 }
-0
+
+type Image = {
+    id: number;
+    image: string;
+}
+
 const allMovies = () => {
     const result = axios.get<Movie[]>('http://localhost:3004/movies');
 
@@ -25,7 +30,6 @@ const allMovies = () => {
 
             formContainer.innerHTML += `
             <div>
-                <img src="${movie.image}" alt="Movie Image" class="movie-image" style="width: 200px; height: auto;">
                 <p>${movie.nickname}</p>
                 <p>${movie.movie}</p>
                 <p>${movie.review}</p>
@@ -57,6 +61,36 @@ const allMovies = () => {
     });
 };
 
+const allImages = () => {
+    const result = axios.get<Image[]>('http://localhost:3004/images');
+
+    imageContainer.innerHTML = '';
+
+    result.then(({ data }) => {
+        data.forEach((image) => {
+            imageContainer.innerHTML += `
+                <div>
+                    <img src="${image.image}" alt="Image" class="image" style="width: 200px; height: auto;">
+                    <br>
+                    <button class="delete-image-button" data-image-id=${image.id}>Delete</button>
+                </div>
+            `;
+        });
+
+        const imageDeleteButtons = document.querySelectorAll<HTMLButtonElement>('.delete-image-button');
+
+        imageDeleteButtons.forEach((deleteButton) => {
+            deleteButton.addEventListener('click', () => {
+                const { imageId } = deleteButton.dataset;
+                axios.delete(`http://localhost:3004/images/${imageId}`).then(() => {
+                    allImages();
+                });
+            });
+        });
+    });
+};
+
+allImages();
 allMovies();
 
 const movieForm = document.querySelector('.js-form-container');
@@ -74,7 +108,7 @@ movieForm.addEventListener('submit', (event) => {
         movie: formValues[1],
         review: formValues[2],
         evaluation: formValues[3],
-        image: currentImageUrl,
+        // image: currentImageUrl,
     }).then(() => {
         allMovies();
         //clear value of (input, textarea)
@@ -82,16 +116,17 @@ movieForm.addEventListener('submit', (event) => {
             element.value = '';
         });
 
-        currentImageUrl = defaultImgPath;
+        // currentImageUrl = defaultImgPath;
     })
     .catch((error) => {
         console.error('Error posting data:', error);
     });
 });
 
-const imageButton = document.querySelector<HTMLButtonElement>('.image-button');
+
 // event for image
-imageButton.addEventListener('click', async () => {
+imageButton.addEventListener('click', (event) => {
+    event.preventDefault();
     try {
         // URL request
         // eslint-disable-next-line no-alert
@@ -99,57 +134,31 @@ imageButton.addEventListener('click', async () => {
 
         if (imageUrl) {
             currentImageUrl = imageUrl;
-
-            // GOOGLE HERE
-            const formData = new FormData();
-            formData.append('image', imageUrl);
-
-            try {
-                const response = await axios.post('http://localhost:3004/images', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-
-                // Get the URL of the image from the server response
-                const createdImageUrl = response.data.url;
-
-                const imageElement = document.createElement('img');
-                imageElement.style.width = '200px';
-                imageElement.style.height = 'auto';
-                imageElement.src = createdImageUrl;
-
-                formContainer.appendChild(imageElement);
-            } catch (error) {
-                console.error('Error creating image:', error);
-            }
         } else {
+            // If no URL is provided, use the default image
             currentImageUrl = defaultImgPath;
         }
+
+        // Send a request to the server to add the image
+        axios.post<Image>('http://localhost:3004/images', {
+            image: currentImageUrl,
+        }).then(() => {
+            allImages();
+
+            currentImageUrl = defaultImgPath;
+        })
+        .catch((error) => {
+            console.error('Error posting data:', error);
+        });
+
+        // Create an image element and append it to the container
+        const imageElement = document.createElement('img');
+        imageElement.style.width = '200px';
+        imageElement.style.height = 'auto';
+        imageElement.src = currentImageUrl;
+
+        imageContainer.appendChild(imageElement);
     } catch (error) {
         console.error('Error adding image:', error);
     }
 });
-
-// const clearImagesButton = document.querySelectorAll<HTMLButtonElement>('.clear-images-button');
-
-// clearImagesButton.forEach((srcDeleteButton) => {
-//     srcDeleteButton.addEventListener('click', () => {
-//         console.log('Button clicked!');
-//         const id = srcDeleteButton.dataset.imageId;
-//         console.log('Trying to delete image with id:', id);
-
-//         if (id) {
-//             axios.delete(`http://localhost:3004/images/${id}`)
-//                 .then(() => {
-//                     console.log('Image deleted successfully.');
-//                     allMovies();
-//                 })
-//                 .catch((error) => {
-//                     console.error('Error deleting image:', error);
-//                 });
-//         } else {
-//             console.warn('No image id found in dataset.');
-//         }
-//     });
-// });
