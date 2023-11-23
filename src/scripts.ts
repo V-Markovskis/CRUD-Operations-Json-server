@@ -50,6 +50,8 @@ const allMovies = () => {
                 <p>${movie.evaluation} out of 10</p>
                 <p>Created at: ${createdAt}</p>
                 <button class="delete-button-js" data-movie-id=${movie.id}>Delete</button>
+                <button class="edit-button-js" data-movie-id=${movie.id}>Edit</button>
+                <button class="js-save-button" data-movie-id=${movie.id}>Save</button>
             </div>
         `; 
 
@@ -82,14 +84,14 @@ const movieForm = document.querySelector('.js-form-container');
 
 movieForm.addEventListener('submit', (event) => {
     event.preventDefault();
-
+    
     const formElements = movieForm.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.review-main-details');
     const createdAt = new Date();
     //element.value is used to retrieve the value of each form element (input field or text field)
     const formValues = Array.from(formElements).map((element) => element.value);
     
     console.log('Form values: ', formValues);
-
+    
     axios.post<Movie>('http://localhost:3004/movies', {
         nickname: formValues[0],
         movie: formValues[1],
@@ -108,6 +110,104 @@ movieForm.addEventListener('submit', (event) => {
         console.error('Error posting data:', error);
     });
 });
+
+
+// edit data part
+const editMovie = (movieId: string) => {
+    const movie = axios.get<Movie>(`http://localhost:3004/movies/${movieId}`).then(({ data }) => {
+        // Get the movie data you want to change
+        // Fill the form with values from the received movie
+        const formElements = movieForm.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.review-main-details');
+        formElements[0].value = data.nickname;
+        formElements[1].value = data.movie;
+        formElements[2].value = data.review;
+        formElements[3].value = String(data.evaluation);
+        formElements[4].value = data.image;
+        
+        const saveButtonn = document.querySelectorAll<HTMLButtonElement>('.js-save-button');
+        //add save logic
+        saveButtonn.forEach((save) => {
+                // Add an event handler to the form to submit the changed data
+                save.addEventListener('click', (event) => {
+                event.preventDefault();
+
+                const formValues = Array.from(formElements).map((element) => element.value);
+
+                axios.put(`http://localhost:3004/movies/${movieId}`, {
+                    nickname: formValues[0],
+                    movie: formValues[1],
+                    review: formValues[2],
+                    evaluation: formValues[3],
+                    image: formValues[4],
+                    creationTime: data.creationTime, // save the original creation time
+                }).then(() => {
+                    allMovies();
+                    formElements.forEach((element) => {
+                        element.value = '';
+                    });
+                }).catch((error) => {
+                    console.error('Error updating data:', error);
+                });
+            });
+        });
+    }).catch((error) => {
+        console.error('Error fetching movie data:', error);
+    });
+};
+
+
+formContainer.addEventListener('click', (event) => {
+    const editButton = event.target as HTMLElement;
+    
+    if (editButton.classList.contains('edit-button-js')) {
+        const { movieId } = editButton.dataset;
+        if (movieId) {
+            console.log('Edit button clicked');
+            editMovie(movieId);
+        }
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
